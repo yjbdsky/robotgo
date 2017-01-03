@@ -29,6 +29,7 @@ static POINT last_click;
 
 // Static event memory.
 static iohook_event event;
+int diskey=0;
 
 // Event dispatch callback.
 static dispatcher_t dispatcher = NULL;
@@ -295,8 +296,13 @@ LRESULT CALLBACK keyboard_hook_event_proc(int nCode, WPARAM wParam, LPARAM lPara
 
 	LRESULT hook_result = -1;
 	if (nCode < 0 || event.reserved ^ 0x01) {
-		hook_result = 1;
-		//hook_result = CallNextHookEx(keyboard_event_hhook, nCode, wParam, lParam);
+		printf("aa:%d",diskey);
+		if (diskey) {
+			hook_result = 1;
+		}else{
+			hook_result = CallNextHookEx(keyboard_event_hhook, nCode, wParam, lParam);
+		}
+
 	}
 	else {
 		logger(LOG_LEVEL_DEBUG,	"%s [%u]: Consuming the current event. (%li)\n",

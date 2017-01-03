@@ -42,6 +42,7 @@
 int aStop();
 int aEvent(char *aevent);
 
+
 bool logger_proc(unsigned int level, const char *format, ...) {
 	bool status = false;
 
@@ -121,11 +122,13 @@ void dispatch_proc(iohook_event * const event) {
 				",keycode=%u,rawcode=0x%X",
 				event->data.keyboard.keycode, event->data.keyboard.rawcode);
 				int akeycode=(uint16_t) event->data.keyboard.keycode;
-				// printf("atoi(str)---%d\n", atoi(cevent));
+				 //printf("atoi(str)---%d\n", atoi(cevent));
 				if (akeycode==atoi(cevent)){
 					int astop=aStop();
+					diskey=1;
 					// printf("%d\n",astop);
 					cstatus=0;
+					//return ;
 				}
 			break;
 
@@ -149,6 +152,7 @@ void dispatch_proc(iohook_event * const event) {
 
 				if (strcmp(buf, cevent) == 0){
 					int astop=aStop();
+					diskey=1;
 					// printf("%d\n",astop);
 					cstatus=0;
 				}
