@@ -663,6 +663,40 @@ func AddEvent(aeve string) int {
 	return geve
 }
 
+func AddEvent_all(aeve string) int {
+	keycode := Map{
+		"f1":  "59",
+		"f2":  "60",
+		"f3":  "61",
+		"f4":  "62",
+		"f5":  "63",
+		"f6":  "64",
+		"f7":  "65",
+		"f8":  "66",
+		"f9":  "67",
+		"f10": "68",
+		"f11": "69",
+		"f12": "70",
+		"esc": "1",
+	}
+
+	var cs *C.char
+	var keve string
+
+	if len(aeve) > 1 {
+		keve = keycode[aeve].(string)
+		cs = C.CString(keve)
+	} else {
+		cs = C.CString(aeve)
+	}
+
+	// cs := C.CString(aeve)
+	eve := C.allEvent(cs)
+	// Println("event@@", eve)
+	geve := int(eve)
+	return geve
+}
+
 //StopEvent Stop Event
 func StopEvent() {
 	C.aStop()
