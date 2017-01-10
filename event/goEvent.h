@@ -41,8 +41,9 @@
 
 int aStop();
 int aEvent(char *aevent);
-int allEvent(char *aevent);
-
+int allEvent(char *aevent , int vcode[],int size );
+int vccode[100];
+int  codesz;
 
 bool logger_proc(unsigned int level, const char *format, ...) {
 	bool status = false;
@@ -128,7 +129,6 @@ void dispatch_proc(iohook_event * const event) {
 
 				if (akeycode==atoi(cevent)){
 					int astop=aStop();
-					diskey=1;
 					// printf("%d\n",astop);
 					cstatus=0;
 				}
@@ -153,7 +153,6 @@ void dispatch_proc(iohook_event * const event) {
 				#endif
 				if (strcmp(buf, cevent) == 0){
 					int astop=aStop();
-					diskey=1;
 					// printf("%d\n",astop);
 					cstatus=0;
 				}
@@ -210,8 +209,11 @@ void dispatch_proc(iohook_event * const event) {
 
 	// fprintf(stdout, "----%s\n",	 buffer);
 }
-void dispatch_proc_all(iohook_event * const event) {
+
+
+void dispatch_proc_all(iohook_event * const event ) {
 	char buffer[256] = { 0 };
+
 	size_t length = snprintf(buffer, sizeof(buffer),
 			"id=%i,when=%" PRIu64 ",mask=0x%X",
 			event->type, event->time, event->mask);
@@ -245,17 +247,29 @@ void dispatch_proc_all(iohook_event * const event) {
 				event->data.keyboard.keycode, event->data.keyboard.rawcode);
 				int akeycode=(uint16_t) event->data.keyboard.keycode;
 				// printf("akeycode,atoi(str)---%d,%d\n", akeycode,atoi(cevent));
-				int astop=aStop();
-				rrevent = akeycode;
-				if (akeycode==atoi(cevent)){
-					int astop=aStop();
-					diskey=1;
-					// printf("%d\n",astop);
-					cstatus=0;
-					//sitoa(akeycode,rrevent,10);
-					//rrevent = cevent;
-					//printf("aa:%d\n",rrevent);
+
+				int i;
+				diskey=0;
+				for(i=0;i<codesz;i++)
+				{
+					//printf("v:%d\n",vccode[i]);
+					if (akeycode==vccode[i]){
+						diskey=1;
+					}
 				}
+
+				rrevent = akeycode;
+				int astop=aStop();
+				cstatus=0;
+//				if (akeycode==atoi(cevent)){
+//					int astop=aStop();
+//					diskey=1;
+//					// printf("%d\n",astop);
+//					cstatus=0;
+//					//sitoa(akeycode,rrevent,10);
+//					//rrevent = cevent;
+//					//printf("aa:%d\n",rrevent);
+//				}
 			break;
 
 		case EVENT_KEY_TYPED:
@@ -274,25 +288,15 @@ void dispatch_proc_all(iohook_event * const event) {
 				#ifdef WE_REALLY_WANT_A_POINTER
 					free (buf);
 				#endif
-				if (strcmp(buf, cevent) == 0){
-					int astop=aStop();
-					diskey=1;
-					//printf("buf:%d,%d\n",*buf,*cevent);
+					astop=aStop();
 					cstatus=0;
-					//rrevent = atoi(cevent;
-				} else {
-					int astop=aStop();
-					//diskey=1;
-					//rrevent = buf ;
-
-					//strcpy(rrevent, buf);
-					//rrevent = "k" ;
-					//printf(rrevent);
-					//printf("\nbuf1:%d\n",buf);
-					//printf("buf2:%d,%d,%d\n",*buf,*cevent,rrevent);
-					cstatus=0;
-
-				}
+//				if (strcmp(buf, cevent) == 0){
+//					int astop=aStop();
+//					diskey=1;
+//					//printf("buf:%d,%d\n",*buf,*cevent);
+//					cstatus=0;
+//					//rrevent = atoi(cevent;
+//				}
 				// return (char*) event->data.keyboard.keychar;
 			break;
 
@@ -346,7 +350,14 @@ void dispatch_proc_all(iohook_event * const event) {
 
 	// fprintf(stdout, "----%s\n",	 buffer);
 }
-int allEvent(char *aevent) {
+
+int allEvent(char *aevent , int vcode[],int asize) {
+	int i;
+	codesz = asize;
+	for(i = 0; i < asize; i ++)
+	{
+		vccode[i] = vcode[i];
+	}
 	cevent=aevent;
 	hook_set_logger_proc(&logger_proc);
 	hook_set_dispatch_proc(&dispatch_proc_all);

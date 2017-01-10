@@ -30,6 +30,7 @@ package robotgo
 import "C"
 
 import (
+	//"fmt"
 	// . "fmt"
 	"reflect"
 	"unsafe"
@@ -663,7 +664,7 @@ func AddEvent(aeve string) int {
 	return geve
 }
 
-func AddEvent_all(aeve string) int {
+func AddEvent_all(aeve string, arr []int32) int {
 	keycode := Map{
 		"f1":  "59",
 		"f2":  "60",
@@ -680,8 +681,13 @@ func AddEvent_all(aeve string) int {
 		"esc": "1",
 	}
 
+	//var carr *C.int
 	var cs *C.char
 	var keve string
+
+	carr := (*C.int)(GoArrayToCArray(arr))
+
+	size := C.int(len(arr))
 
 	if len(aeve) > 1 {
 		keve = keycode[aeve].(string)
@@ -689,13 +695,45 @@ func AddEvent_all(aeve string) int {
 	} else {
 		cs = C.CString(aeve)
 	}
-
+	defer C.free(unsafe.Pointer(cs))
 	// cs := C.CString(aeve)
-	eve := C.allEvent(cs)
+	eve := C.allEvent(cs, carr, size)
 	// Println("event@@", eve)
 	geve := int(eve)
 	return geve
 }
+
+func GoArrayToCArray(goArray []int32) (cArray unsafe.Pointer) {
+	var tmp int32
+	cArray = unsafe.Pointer(&tmp)
+	p := uintptr(cArray)
+	size := int32(len(goArray))
+	for i := int32(0); i < size; i++ {
+		j := goArray[i]
+		*(*int32)(unsafe.Pointer(p)) = int32(j)
+		///fmt.Println(*(*int32)(unsafe.Pointer(p)))
+		p += unsafe.Sizeof(j)
+	}
+
+	return
+}
+
+func CArrayToGoArray(cArray unsafe.Pointer, size int) (goArray []int) {
+	p := uintptr(cArray)
+	for i := 0; i < size; i++ {
+		j := *(*int)(unsafe.Pointer(p))
+		goArray = append(goArray, j)
+		p += unsafe.Sizeof(j)
+	}
+
+	return
+}
+
+//func main() {
+//    … …
+//    goArray := CArrayToGoArray(unsafe.Pointer(&C.cArray[0]), 7)
+//    fmt.Println(goArray)
+//}
 
 //StopEvent Stop Event
 func StopEvent() {
